@@ -46,11 +46,11 @@ server.use(
 );
 
 server.use('/api/users', userRouter);
-server.use('api/auth', authRouter);
+server.use('/api/auth', authRouter);
 
 server.get('/', (req, res) => {
   res.json({ api: 'up' });
-});
+}); 
 
 server.use('*', (req, res, next) => {
   next({ status: 404, message: 'not found' });

@@ -1,3 +1,6 @@
+const User = require('../users/users-model');
+const { findBy } = require('../users/users-model');
+
 /*
   If the user does not have a session saved in the server
 
@@ -7,10 +10,10 @@
   }
 */
 function restricted(req, res, next) {
-  if (req.session.user){
-    next()
-  }else { 
-    next({ status: 401, message: 'You shall not pass!'})
+  if (req.session.user) {
+    next();
+  } else {
+    next({ status: 401, message: 'You shall not pass!' });
   }
 }
 
@@ -23,12 +26,12 @@ function restricted(req, res, next) {
   }
 */
 async function checkUsernameFree(req, res, next) {
- const [user] = await user.findBy({ username: req.body.username })
- if(!user){
-   next()
- }else{
-   next({ status: 401, message: 'Username is taken'})
- }
+  const [user] = await findBy({ username: req.body.username });
+  if (!user) {
+    next();
+  } else {
+    next({ status: 422, message: 'Username taken' });
+  }
 }
 
 /*
@@ -40,11 +43,11 @@ async function checkUsernameFree(req, res, next) {
   }
 */
 async function checkUsernameExists(req, res, next) {
-  const [user] = await user.findBy({ username: req.body.username })
-  if(!user){
-    next({ status: 401, message: 'Invalid credentials'})
-  }else{
-    next()
+  const [user] = await User.findBy({ username: req.body.username });
+  if (!user) {
+    next({ status: 401, message: 'Invalid credentials' });
+  } else {
+    next();
   }
 }
 
@@ -56,15 +59,26 @@ async function checkUsernameExists(req, res, next) {
     "message": "Password must be longer than 3 chars"
   }
 */
-async function checkPasswordLength(req, res, next) {
-if(req.body.password.length <= 3 || !req.body.password){
-  next({ status: 422, message: 'Password must be longer than 3 chars'})
-}else{
-  next()
+function checkPasswordLength(req, res, next) {
+  if ( !req.body.password || req.body.password.length <= 3) {
+    next({ status: 422, message: 'Password must be longer than 3 chars' });
+  } else {
+    next();
+  }
 }
 
-
-}
-
+// function checkPasswordLength(req, res, next) {
+//   if(!req.body.password || req.body.password.length <= 3 ) {
+//     next({ message: 'Password must be longer than 3 chars', status: 422})
+//   } else {
+//     next()
+//   }
+// }
 
 // Don't forget to add these to the `exports` object so they can be required in other modules
+module.exports = {
+  restricted,
+  checkUsernameFree,
+  checkUsernameExists,
+  checkPasswordLength,
+};
